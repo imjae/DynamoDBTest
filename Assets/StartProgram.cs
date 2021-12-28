@@ -81,12 +81,12 @@ public class StartProgram : MonoBehaviour
     {
         var request = new QueryRequest
         {
-            TableName = "user_quest_table",
+            TableName = "SpaceNatCho",
             // KeyConditionExpression = "userId = USER#imjae and BEGINS_WITH(questId, 'QUEST#m_materials')",
-            KeyConditionExpression = "userId = :a and begins_with(questId, :b)",
+            KeyConditionExpression = "PK = :pk and begins_with(SK, :sk)",
             ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
-                {":a", new AttributeValue { S =  "USER#imjae" }},
-                {":b", new AttributeValue { S =  "QUEST#m_materials" }}
+                {":pk", new AttributeValue { S =  "QUEST" }},
+                {":sk", new AttributeValue { S =  "m_place01" }}
             }
         };
 
@@ -98,6 +98,7 @@ public class StartProgram : MonoBehaviour
                 return;
             }
 
+            Debug.Log(result.Response.Items.Count);
             foreach (var item in result.Response.Items)
             {
                 PrintItem(item);
