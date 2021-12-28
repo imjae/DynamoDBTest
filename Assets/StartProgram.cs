@@ -6,6 +6,7 @@ using Amazon;
 using Amazon.CognitoIdentity;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.Model;
 
 public class StartProgram : MonoBehaviour
 {
@@ -22,9 +23,10 @@ public class StartProgram : MonoBehaviour
         client = new AmazonDynamoDBClient(credentials, RegionEndpoint.APNortheast2);
         context = new DynamoDBContext(client);
 
+        FindUserInfoQuest();
 
-        CreateTest();
-        FindItem();
+        // CreateTest();
+        // FindItem();
     }
 
     [DynamoDBTable("Item")]
@@ -73,5 +75,55 @@ public class StartProgram : MonoBehaviour
             Debug.Log($"value : {i.value}");
             Debug.Log($"description : {i.description}");
         }, null);
+    }
+
+    public void FindUserInfoQuest()
+    {
+        var request = new QueryRequest
+        {
+            TableName = "user_quest_table",
+            // KeyConditionExpression = "userId = USER#imjae and BEGINS_WITH(questId, 'QUEST#m_materials')",
+            KeyConditionExpression = "userId = :a and begins_with(questId, :b)",
+            ExpressionAttributeValues = new Dictionary<string, AttributeValue> {
+                {":a", new AttributeValue { S =  "USER#imjae" }},
+                {":b", new AttributeValue { S =  "QUEST#m_materials" }}
+            }
+        };
+
+        client.QueryAsync(request, (result) =>
+        {
+            if (result.Exception != null)
+            {
+                Debug.LogException(result.Exception);
+                return;
+            }
+
+            foreach (var item in result.Response.Items)
+            {
+                PrintItem(item);
+            }
+        });
+
+    }
+    private void PrintItem(Dictionary<string, AttributeValue> attributeList)
+    {
+        string t = null;
+        foreach (var kvp in attributeList)
+        {
+            string attributeName = kvp.Key;
+            AttributeValue value = kvp.Value;
+
+
+            t +=
+            (
+                "\n" + attributeName + " " +
+                (value.S == null ? "" : "S=[" + value.S + "]") +
+                (value.N == null ? "" : "N=[" + value.N + "]") +
+                ("BOLL=[" + value.BOOL + "]") +
+                (value.SS == null ? "" : "SS=[" + string.Join(",", value.SS.ToArray()) + "]") +
+                (value.NS == null ? "" : "NS=[" + string.Join(",", value.NS.ToArray()) + "]")
+            );
+        }
+        Debug.Log(t);
     }
 }
