@@ -34,6 +34,7 @@ public class StartProgram : MonoBehaviour
     {
         [DynamoDBHashKey]
         public string id { get; set; }
+        
 
         [DynamoDBProperty]
         public string name { get; set; }
